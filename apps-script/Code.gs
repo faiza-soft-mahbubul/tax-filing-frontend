@@ -31,11 +31,11 @@ const HEADERS = [
   'Email',
   'Phone',
   'Agreed',
-  'Drive Folder URL',
-  'Article/LLC Documents URLs',
-  'EIN Letter URLs',
-  'Bank Statements URLs',
-  'Owner Address Proof URLs',
+  'Google Drive Folder',
+  'Article of Organization / LLC Documents',
+  'EIN Letter',
+  'Bank Statements',
+  'Owner Address Proof Document',
 ];
 
 function sanitizeName(name) {

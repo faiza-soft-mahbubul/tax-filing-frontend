@@ -136,7 +136,6 @@ function openLocalFile(file) {
 export default function TaxForm() {
   const { form, setFormField, formSubmitted, formLoading, setFormLoading, setFormSubmitted } = useStore()
   const [submitError, setSubmitError] = useState('')
-  const [submitResult, setSubmitResult] = useState(null)
 
   const handleSubmit = async () => {
     setSubmitError('')
@@ -208,7 +207,6 @@ export default function TaxForm() {
         throw new Error(result.message || `Submission failed. Server returned ${response.status}.`)
       }
 
-      setSubmitResult(result)
       setFormLoading(false)
       setFormSubmitted(true)
     } catch (error) {
@@ -256,37 +254,8 @@ export default function TaxForm() {
               <div className="text-center py-8">
                 <h3 className="font-heading font-bold text-2xl text-gray-900 mb-3">Application Submitted</h3>
                 <p className="text-gray-500 text-sm leading-loose">
-                  Your data and documents were sent successfully.
+                  Your application was submitted successfully.
                 </p>
-
-                {submitResult?.folderUrl && (
-                  <div className="mt-4">
-                    <a href={submitResult.folderUrl} target="_blank" rel="noreferrer" style={{ color: '#00BABA', textDecoration: 'underline', fontWeight: 600 }}>
-                      Open Google Drive Folder
-                    </a>
-                  </div>
-                )}
-
-                {submitResult?.uploadedFiles && (
-                  <div className="mt-5 text-left">
-                    {documentFields.map((field) => {
-                      const links = submitResult.uploadedFiles[field.key] || []
-                      if (links.length === 0) return null
-                      return (
-                        <div key={field.key} style={{ marginBottom: '0.7rem' }}>
-                          <div style={{ fontWeight: 600, color: '#374151', fontSize: '0.85rem' }}>{field.label}</div>
-                          {links.map((item) => (
-                            <div key={item.id || item.url} style={{ fontSize: '0.82rem' }}>
-                              <a href={item.url} target="_blank" rel="noreferrer" style={{ color: '#00BABA', textDecoration: 'underline' }}>
-                                {item.name || 'Open file'}
-                              </a>
-                            </div>
-                          ))}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
               </div>
             ) : (
               <div id="filing-form">
@@ -469,7 +438,7 @@ export default function TaxForm() {
                     opacity: formLoading ? 0.8 : 1,
                   }}
                 >
-                  {formLoading ? 'Processing...' : 'Submit Tax Filing Application'}
+                  {formLoading ? 'Submitting, please wait...' : 'Submit Tax Filing Application'}
                 </button>
 
                 {submitError && (
