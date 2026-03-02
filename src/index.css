@@ -3,68 +3,120 @@
 @tailwind utilities;
 
 @layer base {
+  :root,
+  [data-theme='light'] {
+    --bg-0: #f4f7fb;
+    --bg-1: #ffffff;
+    --bg-2: #eef3f9;
+    --surface-1: #f8fbff;
+    --line: #d7e0ec;
+    --text-0: #0f172a;
+    --text-1: #334155;
+    --text-2: #64748b;
+    --accent: #0b84ff;
+    --accent-2: #4ea1ff;
+    --accent-rgb: 11, 132, 255;
+    --accent-2-rgb: 78, 161, 255;
+    --accent-soft: rgba(11, 132, 255, 0.14);
+    --success: #15803d;
+    --danger: #dc2626;
+    --nav-bg: rgba(255, 255, 255, 0.88);
+  }
+
+  [data-theme='dark'] {
+    --bg-0: #1e1e1e;
+    --bg-1: #1f1f23;
+    --bg-2: #252526;
+    --surface-1: #2d2d30;
+    --line: #3c3c3c;
+    --text-0: #f3f4f6;
+    --text-1: #d4d4d4;
+    --text-2: #9da1a8;
+    --accent: #2b88f2;
+    --accent-2: #4ea1ff;
+    --accent-rgb: 43, 136, 242;
+    --accent-2-rgb: 78, 161, 255;
+    --accent-soft: rgba(78, 161, 255, 0.16);
+    --success: #2ea043;
+    --danger: #f85149;
+    --nav-bg: rgba(31, 31, 35, 0.92);
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'Poppins', sans-serif;
-    background: #ffffff;
-    color: #111827;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-0);
+    color: var(--text-1);
     overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
   h1, h2, h3, h4, h5 {
-    font-family: 'Raleway', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  /* Native dropdown menu on Windows/Chrome can ignore theme vars.
+     Keep option list readable in both light and dark modes. */
+  select option {
+    color: #111827;
+    background: #ffffff;
   }
 }
 
 @layer components {
-  /* ── Section shared ── */
   .section-inner {
     @apply max-w-6xl mx-auto px-8;
   }
 
   .section-label {
-    @apply inline-flex items-center gap-2 text-teal font-bold uppercase tracking-widest text-xs mb-3;
+    @apply inline-flex items-center gap-2 font-bold uppercase tracking-widest text-xs mb-3;
+    color: var(--accent-2);
   }
   .section-label::before {
     content: '';
-    @apply block w-6 h-0.5 bg-teal;
+    @apply block w-6 h-0.5;
+    background: var(--accent);
   }
 
   .section-title {
     @apply font-heading font-extrabold leading-tight mb-4;
     font-size: clamp(1.8rem, 3vw, 2.7rem);
+    color: var(--text-0);
   }
   .section-title span {
-    background: linear-gradient(135deg, #00BABA, #00D8D8);
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .section-sub {
-    @apply text-gray-500 text-base leading-relaxed max-w-xl;
+    @apply text-base leading-relaxed max-w-xl;
+    color: var(--text-2);
   }
 
-  /* ── Buttons ── */
   .btn-primary {
-    background: linear-gradient(135deg, #00BABA, #00D8D8);
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
     @apply text-white font-bold px-7 py-3 rounded-lg inline-flex items-center gap-2 transition-all duration-300;
-    box-shadow: 0 3px 12px rgba(0,186,186,0.18);
+    border: 1px solid var(--accent-2);
+    box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.35);
   }
   .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,186,186,0.28);
+    box-shadow: 0 8px 24px rgba(var(--accent-rgb), 0.42);
   }
 
   .btn-secondary {
-    @apply border border-teal text-teal font-medium px-7 py-3 rounded-lg inline-flex items-center gap-2 transition-all duration-300;
+    @apply font-medium px-7 py-3 rounded-lg inline-flex items-center gap-2 transition-all duration-300;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    color: var(--text-1);
   }
   .btn-secondary:hover {
-    @apply bg-teal-50 text-teal;
+    filter: brightness(0.96);
   }
 
-  /* ── Reveal animation ── */
   .reveal {
     opacity: 0;
     transform: translateY(28px);
@@ -76,14 +128,12 @@
   }
 }
 
-/* ── Pulse dot ── */
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(1.3); }
 }
 .pulse-dot { animation: pulse-dot 2s infinite; }
 
-/* ── Float cards ── */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
@@ -91,16 +141,14 @@
 .float-anim { animation: float 4s ease-in-out infinite; }
 .float-anim-delayed { animation: float 4s ease-in-out 2s infinite; }
 
-/* ── Hero grid overlay ── */
 .hero-grid-overlay {
   background-image:
-    linear-gradient(rgba(0,186,186,0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,186,186,0.07) 1px, transparent 1px);
-  background-size: 60px 60px;
+    linear-gradient(rgba(var(--accent-2-rgb), 0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--accent-2-rgb), 0.22) 1px, transparent 1px);
+  background-size: 56px 56px;
   mask-image: radial-gradient(ellipse 80% 80% at center, black 0%, transparent 70%);
 }
 
-/* ── Flow step card animation ── */
 .flow-step-card {
   opacity: 0;
   transform: translateX(-24px);
@@ -109,15 +157,15 @@
 .flow-step-card.active {
   opacity: 1;
   transform: translateX(0);
-  border-color: rgba(0,186,186,0.3) !important;
-  box-shadow: 0 2px 16px rgba(0,186,186,0.07);
+  border-color: rgba(var(--accent-2-rgb), 0.52) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 .flow-step-card::before {
   content: '';
   position: absolute;
   left: 0; top: 0; bottom: 0;
   width: 3px;
-  background: linear-gradient(180deg, #00BABA, #00D8D8);
+  background: linear-gradient(180deg, var(--accent-2), var(--accent));
   border-radius: 0 2px 2px 0;
   transform: scaleY(0);
   transform-origin: top;
@@ -127,29 +175,30 @@
 .flow-step-card::after {
   content: '';
   position: absolute;
-  left: -7px; top: 22px;
+  left: -7px;
+  top: 50%;
   width: 12px; height: 12px;
-  background: #fff;
-  border-left: 1.5px solid rgba(0,186,186,0.3);
-  border-bottom: 1.5px solid rgba(0,186,186,0.3);
-  transform: rotate(45deg);
+  background: var(--bg-2);
+  border-left: 1.5px solid rgba(var(--accent-2-rgb), 0.48);
+  border-bottom: 1.5px solid rgba(var(--accent-2-rgb), 0.48);
+  transform: translateY(-50%) rotate(45deg);
 }
 
 .flow-dot-circle {
   transition: border-color 0.4s, background 0.4s, color 0.4s, box-shadow 0.4s;
 }
 .flow-dot-circle.active {
-  border-color: #00BABA !important;
-  background: #00BABA !important;
+  border-color: var(--accent-2) !important;
+  background: var(--accent) !important;
   color: #fff !important;
-  box-shadow: 0 0 0 6px rgba(0,186,186,0.12), 0 4px 16px rgba(0,186,186,0.2);
+  box-shadow: 0 0 0 6px rgba(var(--accent-2-rgb), 0.3), 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 .flow-dot-circle::after {
   content: '';
   position: absolute;
   inset: -6px;
   border-radius: 50%;
-  border: 2px solid #00BABA;
+  border: 2px solid var(--accent-2);
   opacity: 0;
   transform: scale(0.85);
   transition: opacity 0.4s, transform 0.4s;

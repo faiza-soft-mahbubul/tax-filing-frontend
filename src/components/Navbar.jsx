@@ -8,7 +8,24 @@ const navLinks = [
   { label: 'FAQ', href: '#faq' },
 ]
 
-export default function Navbar() {
+function SunIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+    </svg>
+  )
+}
+
+function MoonIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3c0 0 0 0 0 0A7 7 0 0 0 21 12.79z" />
+    </svg>
+  )
+}
+
+export default function Navbar({ theme, onToggleTheme }) {
   const { mobileMenuOpen, toggleMobileMenu, closeMobileMenu } = useStore()
   const [scrolled, setScrolled] = useState(false)
 
@@ -27,85 +44,103 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'shadow-sm' : ''
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'shadow-sm' : ''}`}
       style={{
         backdropFilter: 'blur(20px)',
-        background: 'rgba(255,255,255,0.95)',
-        borderBottom: '1px solid rgba(0,186,186,0.2)',
-        boxShadow: scrolled ? '0 1px 8px rgba(0,0,0,0.04)' : 'none',
+        background: 'var(--nav-bg)',
+        borderBottom: '1px solid var(--line)',
+        boxShadow: scrolled ? '0 8px 24px rgba(0,0,0,0.14)' : 'none',
       }}
     >
       <div className="max-w-6xl mx-auto px-8 flex items-center justify-between py-4">
-        {/* Logo */}
         <a href="#" onClick={(e) => handleNav(e, '#')} className="flex items-center gap-3 no-underline">
           <div
             className="flex items-center justify-center rounded-xl p-1 flex-shrink-0"
-            style={{ width: 42, height: 42, background: '#fff', boxShadow: '0 1px 6px rgba(0,186,186,0.12)' }}
+            style={{ width: 42, height: 42, background: 'var(--surface-1)', border: '1px solid var(--line)' }}
           >
             <img src={logoImg} alt="Mas Formation" className="w-full h-full object-contain" />
           </div>
-          <span className="font-heading font-bold text-gray-900 text-xl">
-            Mas <span className="text-teal">Formation</span>
+          <span className="font-heading font-bold text-xl" style={{ color: 'var(--text-0)' }}>
+            Mas <span style={{ color: 'var(--accent-2)' }}>Formation</span>
           </span>
         </a>
 
-        {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-10">
+        <div className="hidden md:flex items-center gap-6">
           {navLinks.map((l) => (
             <a
               key={l.href}
               href={l.href}
               onClick={(e) => handleNav(e, l.href)}
-              className="text-gray-600 hover:text-teal text-sm font-medium transition-colors duration-200 no-underline"
+              className="text-sm font-medium transition-colors duration-200 no-underline"
+              style={{ color: 'var(--text-1)' }}
             >
               {l.label}
             </a>
           ))}
-          <a
-            href="#tax-form"
-            onClick={(e) => handleNav(e, '#tax-form')}
-            className="btn-primary text-sm px-5 py-2"
+
+          <button
+            type="button"
+            onClick={onToggleTheme}
+            className="w-9 h-9 inline-flex items-center justify-center rounded-lg transition-all"
+            style={{ background: 'var(--bg-2)', border: '1px solid var(--line)', color: 'var(--text-1)' }}
+            aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+            title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
           >
-            Tax Filing →
+            {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+          </button>
+
+          <a href="#tax-form" onClick={(e) => handleNav(e, '#tax-form')} className="btn-primary text-sm px-5 py-2">
+            Tax Filing
           </a>
         </div>
 
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden flex flex-col gap-1.5 p-2"
-          onClick={toggleMobileMenu}
-          aria-label="Toggle menu"
-        >
-          <span className={`block w-6 h-0.5 bg-gray-700 transition-all ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-          <span className={`block w-6 h-0.5 bg-gray-700 transition-all ${mobileMenuOpen ? 'opacity-0' : ''}`} />
-          <span className={`block w-6 h-0.5 bg-gray-700 transition-all ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+        <button className="md:hidden flex flex-col gap-1.5 p-2" onClick={toggleMobileMenu} aria-label="Toggle menu">
+          <span
+            className={`block w-6 h-0.5 transition-all ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}
+            style={{ background: 'var(--text-1)' }}
+          />
+          <span
+            className={`block w-6 h-0.5 transition-all ${mobileMenuOpen ? 'opacity-0' : ''}`}
+            style={{ background: 'var(--text-1)' }}
+          />
+          <span
+            className={`block w-6 h-0.5 transition-all ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}
+            style={{ background: 'var(--text-1)' }}
+          />
         </button>
       </div>
 
-      {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden px-8 pb-6 flex flex-col gap-4 border-t border-teal-200 bg-white">
+        <div className="md:hidden px-8 pb-6 flex flex-col gap-4 border-t" style={{ borderColor: 'var(--line)', background: 'var(--bg-1)' }}>
           {navLinks.map((l) => (
             <a
               key={l.href}
               href={l.href}
               onClick={(e) => handleNav(e, l.href)}
-              className="text-gray-600 hover:text-teal font-medium py-1 no-underline"
+              className="font-medium py-1 no-underline"
+              style={{ color: 'var(--text-1)' }}
             >
               {l.label}
             </a>
           ))}
-          <a
-            href="#tax-form"
-            onClick={(e) => handleNav(e, '#tax-form')}
-            className="btn-primary text-sm self-start"
+
+          <button
+            type="button"
+            onClick={onToggleTheme}
+            className="w-9 h-9 inline-flex items-center justify-center rounded-lg transition-all self-start"
+            style={{ background: 'var(--bg-2)', border: '1px solid var(--line)', color: 'var(--text-1)' }}
+            aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+            title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
           >
-            Tax Filing →
+            {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+          </button>
+
+          <a href="#tax-form" onClick={(e) => handleNav(e, '#tax-form')} className="btn-primary text-sm self-start">
+            Tax Filing
           </a>
         </div>
       )}
     </nav>
   )
 }
+
