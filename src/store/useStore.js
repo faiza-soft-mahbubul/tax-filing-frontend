@@ -1,61 +1,75 @@
-import { create } from 'zustand'
+import { useSyncExternalStore } from 'react'
 
-const useStore = create((set) => ({
-  // ── Form state ──────────────────────────────────────────────────────
-  form: {
-    businessName: '',
-    ein: '',
-    businessAddress: '',
-    incDay: '',
-    incMonth: '',
-    incYear: '',
-    businessCode: '',
-    ownerName: '',
-    ownerAddress: '',
-    income: '',
-    expenses: '',
-    cogs: '',
-    llcCost: '',
-    fyMonth: '',
-    fyDay: '',
-    notes: '',
-    email: '',
-    phone: '',
-    agreed: false,
-    files: [],
-  },
+const initialForm = {
+  businessName: '',
+  ein: '',
+  businessAddress: '',
+  incDay: '',
+  incMonth: '',
+  incYear: '',
+  businessCode: '',
+  ownerName: '',
+  ownerAddress: '',
+  income: '',
+  expenses: '',
+  cogs: '',
+  llcCost: '',
+  fyMonth: '',
+  fyDay: '',
+  notes: '',
+  email: '',
+  phone: '',
+  agreed: false,
+  files: [],
+}
+
+const initialState = {
+  form: initialForm,
   formSubmitted: false,
   formLoading: false,
-
-  setFormField: (field, value) =>
-    set((state) => ({ form: { ...state.form, [field]: value } })),
-
-  setFormLoading: (v) => set({ formLoading: v }),
-  setFormSubmitted: (v) => set({ formSubmitted: v }),
-
-  resetForm: () =>
-    set({
-      formSubmitted: false,
-      formLoading: false,
-      form: {
-        businessName: '', ein: '', businessAddress: '',
-        incDay: '', incMonth: '', incYear: '', businessCode: '',
-        ownerName: '', ownerAddress: '',
-        income: '', expenses: '', cogs: '', llcCost: '',
-        fyMonth: '', fyDay: '', notes: '',
-        email: '', phone: '', agreed: false, files: [],
-      },
-    }),
-
-  // ── FAQ state ────────────────────────────────────────────────────────
   openFaqIndex: null,
-  setOpenFaqIndex: (i) =>
-    set((state) => ({ openFaqIndex: state.openFaqIndex === i ? null : i })),
-
-  // ── Nav / mobile menu ────────────────────────────────────────────────
   mobileMenuOpen: false,
-  toggleMobileMenu: () => set((state) => ({ mobileMenuOpen: !state.mobileMenuOpen })),
-  closeMobileMenu: () => set({ mobileMenuOpen: false }),
-}))
+}
 
-export default useStore
+let state = initialState
+const listeners = new Set()
+
+function setState(updater) {
+  const nextState = typeof updater === 'function' ? updater(state) : updater
+  state = { ...state, ...nextState }
+  listeners.forEach((listener) => listener())
+}
+
+function subscribe(listener) {
+  listeners.add(listener)
+  return () => listeners.delete(listener)
+}
+
+function getSnapshot() {
+  return state
+}
+
+export default function useStore() {
+  const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
+
+  return {
+    ...snapshot,
+    setFormField: (field, value) =>
+      setState((current) => ({ form: { ...current.form, [field]: value } })),
+    setFormLoading: (value) => setState({ formLoading: value }),
+    setFormSubmitted: (value) => setState({ formSubmitted: value }),
+    resetForm: () =>
+      setState({
+        formSubmitted: false,
+        formLoading: false,
+        form: { ...initialForm },
+      }),
+    setOpenFaqIndex: (index) =>
+      setState((current) => ({
+        openFaqIndex: current.openFaqIndex === index ? null : index,
+      })),
+    toggleMobileMenu: () =>
+      setState((current) => ({ mobileMenuOpen: !current.mobileMenuOpen })),
+    closeMobileMenu: () => setState({ mobileMenuOpen: false }),
+  }
+}

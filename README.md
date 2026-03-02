@@ -1,72 +1,57 @@
-# Mas Formation — React + Vite + Tailwind CSS
+# Mas Formation
 
-US Tax Filing & LLC Services landing page built with:
-- **React 18** — UI framework
-- **Vite** — lightning-fast dev server & build tool
-- **Tailwind CSS v3** — utility-first styling
-- **Zustand** — lightweight global state management
+Landing page with a tax filing form. On submit, data is sent to a backend API and appended to Google Sheets.
 
-## Project Structure
+## Tech stack
 
-```
-mas-formation/
-├── public/
-│   └── logo.png              # Favicon & navbar logo
-├── src/
-│   ├── components/
-│   │   ├── Navbar.jsx        # Fixed navbar with mobile menu
-│   │   ├── Hero.jsx          # Hero section with animated doc card
-│   │   ├── WhyChoose.jsx     # 6-feature cards with scroll reveal
-│   │   ├── HowItWorks.jsx    # Scroll-driven vertical timeline (Steps 1–4)
-│   │   ├── FAQ.jsx           # Accordion FAQ (Zustand state)
-│   │   ├── TaxForm.jsx       # Full tax filing form (Zustand state)
-│   │   └── Footer.jsx        # Footer with gradient top bar
-│   ├── store/
-│   │   └── useStore.js       # Zustand store (form, FAQ, mobile menu)
-│   ├── App.jsx               # Root component
-│   ├── main.jsx              # Entry point
-│   └── index.css             # Tailwind + custom CSS
-├── index.html
-├── vite.config.js
-├── tailwind.config.js
-├── postcss.config.js
-└── package.json
-```
+- React + Vite + Tailwind CSS
+- Express API server
+- Google Drive API + Google Sheets API
 
-## Getting Started
+## Setup
 
-### 1. Install dependencies
+1. Install dependencies:
+
 ```bash
-npm install
+pnpm install
 ```
 
-### 2. Start development server
+2. Create `.env` from `.env.example` and fill credentials.
+
+Recommended credentials:
+- `GOOGLE_SERVICE_ACCOUNT_JSON` (or `GOOGLE_CLIENT_EMAIL` + `GOOGLE_PRIVATE_KEY`)
+
+Optional:
+- `GOOGLE_SHEET_ID` to force writing into an existing sheet
+- `GOOGLE_SHEET_TITLE` defaults to `tax-failling`
+- `GOOGLE_WORKSHEET_TITLE` defaults to `Submissions`
+
+## Run
+
+Start frontend + backend together:
+
 ```bash
-npm run dev
+pnpm dev
 ```
-Open [http://localhost:5173](http://localhost:5173)
 
-### 3. Build for production
+- Frontend: `http://localhost:5173`
+- Backend API: `http://localhost:8787`
+
+## Submit flow
+
+When form is submitted:
+
+1. API checks required fields (`email`, `phone`, `agreed`)
+2. Backend finds spreadsheet named `tax-failling`
+3. If not found, backend creates it
+4. Backend creates worksheet/header if needed
+5. Backend appends a new row with form data
+
+## Production
+
 ```bash
-npm run build
-```
-Output goes to `/dist` folder — ready to deploy on Netlify, Vercel, or any static host.
-
-### 4. Preview production build
-```bash
-npm run preview
+pnpm build
+NODE_ENV=production pnpm start
 ```
 
-## Zustand State (src/store/useStore.js)
-
-| State | Description |
-|---|---|
-| `form` | All tax filing form fields |
-| `formSubmitted` | Whether form was submitted successfully |
-| `formLoading` | Submit loading state |
-| `openFaqIndex` | Which FAQ item is open |
-| `mobileMenuOpen` | Mobile nav menu open/close |
-
-## Deploy to Netlify (free)
-1. Run `npm run build`
-2. Drag the `dist/` folder to [netlify.com/drop](https://app.netlify.com/drop)
+In production mode, Express serves both API and built frontend from `dist/`.

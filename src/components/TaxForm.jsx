@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import useStore from '../store/useStore'
 
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -71,8 +72,11 @@ function TTextarea({ placeholder, value, onChange }) {
 
 export default function TaxForm() {
   const { form, setFormField, formSubmitted, formLoading, setFormLoading, setFormSubmitted } = useStore()
+  const [submitError, setSubmitError] = useState('')
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setSubmitError('')
+
     if (!form.email || !form.phone) {
       alert('Please fill in your Email Address and WhatsApp Number.')
       return
@@ -81,11 +85,47 @@ export default function TaxForm() {
       alert('Please agree to the Terms of Service to continue.')
       return
     }
+
     setFormLoading(true)
-    setTimeout(() => {
+    try {
+      const payload = {
+        ...form,
+        files: (form.files || []).map((file) => ({
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        })),
+      }
+
+      const response = await fetch('/api/tax-filing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      const rawBody = await response.text()
+      let result = {}
+
+      if (rawBody) {
+        try {
+          result = JSON.parse(rawBody)
+        } catch {
+          result = { message: rawBody }
+        }
+      }
+
+      if (!response.ok || !result.ok) {
+        throw new Error(
+          result.message || `Submission failed. Server returned ${response.status}.`
+        )
+      }
+
       setFormLoading(false)
       setFormSubmitted(true)
-    }, 1200)
+    } catch (error) {
+      setFormLoading(false)
+      setSubmitError(error.message || 'Submission failed. Please try again.')
+    }
   }
 
   const set = (field) => (e) => setFormField(field, e.target.value)
@@ -269,6 +309,11 @@ export default function TaxForm() {
                 <p className="text-center mt-3" style={{ fontSize:'0.76rem', color:'#9CA3AF' }}>
                   🔒 Your information is fully secure. No spam, ever.
                 </p>
+                {submitError && (
+                  <p className="text-center mt-3" style={{ fontSize:'0.8rem', color:'#EF4444' }}>
+                    {submitError}
+                  </p>
+                )}
               </div>
             )}
           </div>
