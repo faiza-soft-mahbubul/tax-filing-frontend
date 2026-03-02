@@ -23,6 +23,7 @@ Recommended credentials:
 
 Optional:
 - `GOOGLE_SHEET_ID` to force writing into an existing sheet
+- `VITE_SHEET_ID` fallback for existing sheet ID
 - `GOOGLE_SHEET_TITLE` defaults to `tax-failling`
 - `GOOGLE_WORKSHEET_TITLE` defaults to `Submissions`
 

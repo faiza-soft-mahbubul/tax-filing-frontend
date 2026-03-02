@@ -182,8 +182,9 @@ function toRow(data) {
 }
 
 async function getOrCreateSpreadsheetId(drive, sheets) {
-  if (process.env.GOOGLE_SHEET_ID) {
-    return process.env.GOOGLE_SHEET_ID
+  const configuredSheetId = process.env.GOOGLE_SHEET_ID || process.env.VITE_SHEET_ID
+  if (configuredSheetId) {
+    return configuredSheetId
   }
 
   const existingId = await findSpreadsheetByTitle(drive, SPREADSHEET_TITLE)
