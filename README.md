@@ -1,58 +1,77 @@
 # Mas Formation
 
-Landing page with a tax filing form. On submit, data is sent to a backend API and appended to Google Sheets.
-
-## Tech stack
-
-- React + Vite + Tailwind CSS
-- Express API server
-- Google Drive API + Google Sheets API
-
-## Setup
-
-1. Install dependencies:
-
-```bash
-pnpm install
-```
-
-2. Create `.env` from `.env.example` and fill credentials.
-
-Recommended credentials:
-- `GOOGLE_SERVICE_ACCOUNT_JSON` (or `GOOGLE_CLIENT_EMAIL` + `GOOGLE_PRIVATE_KEY`)
-
-Optional:
-- `GOOGLE_SHEET_ID` to force writing into an existing sheet
-- `VITE_SHEET_ID` fallback for existing sheet ID
-- `GOOGLE_SHEET_TITLE` defaults to `tax-failling`
-- `GOOGLE_WORKSHEET_TITLE` defaults to `Submissions`
+Frontend-only landing page. Form data is sent directly to a Google Apps Script Web App URL.
 
 ## Run
 
-Start frontend + backend together:
-
 ```bash
+pnpm install
 pnpm dev
 ```
 
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:8787`
+App runs on `http://localhost:5173`.
 
-## Submit flow
+## Env
 
-When form is submitted:
+Create `.env` with:
 
-1. API checks required fields (`email`, `phone`, `agreed`)
-2. Backend finds spreadsheet named `tax-failling`
-3. If not found, backend creates it
-4. Backend creates worksheet/header if needed
-5. Backend appends a new row with form data
-
-## Production
-
-```bash
-pnpm build
-NODE_ENV=production pnpm start
+```env
+VITE_APPS_SCRIPT_URL=https://script.google.com/macros/s/your-web-app-id/exec
 ```
 
-In production mode, Express serves both API and built frontend from `dist/`.
+## Google Apps Script (required)
+
+Create a new Apps Script project and deploy as **Web app**:
+- Execute as: `Me`
+- Who has access: `Anyone`
+
+Use this sample `Code.gs`:
+
+```javascript
+function doPost(e) {
+  var payload = JSON.parse(e.postData.contents || '{}');
+  var spreadsheetId = 'YOUR_SHEET_ID';
+  var sheetName = 'Submissions';
+
+  var ss = SpreadsheetApp.openById(spreadsheetId);
+  var sh = ss.getSheetByName(sheetName);
+  if (!sh) sh = ss.insertSheet(sheetName);
+
+  if (sh.getLastRow() === 0) {
+    sh.appendRow([
+      'submitted_at', 'business_name', 'ein', 'business_address', 'inc_day',
+      'inc_month', 'inc_year', 'business_code', 'owner_name', 'owner_address',
+      'income', 'expenses', 'cogs', 'llc_cost', 'fy_month', 'fy_day',
+      'notes', 'email', 'phone', 'agreed', 'files'
+    ]);
+  }
+
+  sh.appendRow([
+    new Date(),
+    payload.businessName || '',
+    payload.ein || '',
+    payload.businessAddress || '',
+    payload.incDay || '',
+    payload.incMonth || '',
+    payload.incYear || '',
+    payload.businessCode || '',
+    payload.ownerName || '',
+    payload.ownerAddress || '',
+    payload.income || '',
+    payload.expenses || '',
+    payload.cogs || '',
+    payload.llcCost || '',
+    payload.fyMonth || '',
+    payload.fyDay || '',
+    payload.notes || '',
+    payload.email || '',
+    payload.phone || '',
+    payload.agreed ? 'yes' : 'no',
+    (payload.files || []).map(function (f) { return f.name || ''; }).join(', ')
+  ]);
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ ok: true }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+```

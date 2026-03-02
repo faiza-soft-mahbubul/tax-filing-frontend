@@ -4,6 +4,7 @@ import useStore from '../store/useStore'
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
 const DAYS = Array.from({length:31},(_,i)=>String(i+1).padStart(2,'0'))
 const YEARS = Array.from({length:30},(_,i)=>String(2024-i))
+const APPS_SCRIPT_URL = import.meta.env.VITE_APPS_SCRIPT_URL
 
 function Field({ label, children }) {
   return (
@@ -88,6 +89,10 @@ export default function TaxForm() {
 
     setFormLoading(true)
     try {
+      if (!APPS_SCRIPT_URL) {
+        throw new Error('VITE_APPS_SCRIPT_URL is missing in .env')
+      }
+
       const payload = {
         ...form,
         files: (form.files || []).map((file) => ({
@@ -97,27 +102,16 @@ export default function TaxForm() {
         })),
       }
 
-      const response = await fetch('/api/tax-filing', {
+      // Apps Script web app works best with a simple request (no preflight).
+      const response = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload),
       })
 
-      const rawBody = await response.text()
-      let result = {}
-
-      if (rawBody) {
-        try {
-          result = JSON.parse(rawBody)
-        } catch {
-          result = { message: rawBody }
-        }
-      }
-
-      if (!response.ok || !result.ok) {
-        throw new Error(
-          result.message || `Submission failed. Server returned ${response.status}.`
-        )
+      if (response.type !== 'opaque' && !response.ok) {
+        throw new Error(`Submission failed. Server returned ${response.status}.`)
       }
 
       setFormLoading(false)
