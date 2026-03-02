@@ -4,9 +4,7 @@ const initialForm = {
   businessName: '',
   ein: '',
   businessAddress: '',
-  incDay: '',
-  incMonth: '',
-  incYear: '',
+  incDate: '',
   businessCode: '',
   ownerName: '',
   ownerAddress: '',
@@ -20,7 +18,10 @@ const initialForm = {
   email: '',
   phone: '',
   agreed: false,
-  files: [],
+  articleDocs: [],
+  einLetter: [],
+  bankStatements: [],
+  ownerAddressProof: [],
 }
 
 const initialState = {

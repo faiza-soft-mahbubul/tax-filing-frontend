@@ -1,6 +1,6 @@
 # Mas Formation
 
-Frontend-only landing page. Form data is sent directly to a Google Apps Script Web App URL.
+Frontend-only landing page. Form + document files are sent to a Google Apps Script Web App URL.
 
 ## Run
 
@@ -9,69 +9,45 @@ pnpm install
 pnpm dev
 ```
 
-App runs on `http://localhost:5173`.
+App runs at `http://localhost:5173`.
 
 ## Env
 
-Create `.env` with:
+Set in `.env`:
 
 ```env
 VITE_APPS_SCRIPT_URL=https://script.google.com/macros/s/your-web-app-id/exec
 ```
 
-## Google Apps Script (required)
+## Document Upload Flow
 
-Create a new Apps Script project and deploy as **Web app**:
+The form sends:
+- Business information fields
+- Four document groups:
+  - `articleDocs`
+  - `einLetter`
+  - `bankStatements` (multiple)
+  - `ownerAddressProof`
+
+Each file is sent as:
+- `originalName`
+- `mimeType`
+- `size`
+- `base64`
+
+## Apps Script
+
+Use the code from:
+- `apps-script/Code.gs`
+
+This script:
+1. Creates/uses business-name folder under parent Drive folder `1ajrGrUf1kgn8pvdQU-Pi_RGk-Ow97gwf`
+2. Uploads files with clean names
+3. Appends row to Google Sheet
+4. Returns uploaded file links + folder URL
+
+Deploy as Web App:
 - Execute as: `Me`
 - Who has access: `Anyone`
 
-Use this sample `Code.gs`:
-
-```javascript
-function doPost(e) {
-  var payload = JSON.parse(e.postData.contents || '{}');
-  var spreadsheetId = 'YOUR_SHEET_ID';
-  var sheetName = 'Submissions';
-
-  var ss = SpreadsheetApp.openById(spreadsheetId);
-  var sh = ss.getSheetByName(sheetName);
-  if (!sh) sh = ss.insertSheet(sheetName);
-
-  if (sh.getLastRow() === 0) {
-    sh.appendRow([
-      'submitted_at', 'business_name', 'ein', 'business_address', 'inc_day',
-      'inc_month', 'inc_year', 'business_code', 'owner_name', 'owner_address',
-      'income', 'expenses', 'cogs', 'llc_cost', 'fy_month', 'fy_day',
-      'notes', 'email', 'phone', 'agreed', 'files'
-    ]);
-  }
-
-  sh.appendRow([
-    new Date(),
-    payload.businessName || '',
-    payload.ein || '',
-    payload.businessAddress || '',
-    payload.incDay || '',
-    payload.incMonth || '',
-    payload.incYear || '',
-    payload.businessCode || '',
-    payload.ownerName || '',
-    payload.ownerAddress || '',
-    payload.income || '',
-    payload.expenses || '',
-    payload.cogs || '',
-    payload.llcCost || '',
-    payload.fyMonth || '',
-    payload.fyDay || '',
-    payload.notes || '',
-    payload.email || '',
-    payload.phone || '',
-    payload.agreed ? 'yes' : 'no',
-    (payload.files || []).map(function (f) { return f.name || ''; }).join(', ')
-  ]);
-
-  return ContentService
-    .createTextOutput(JSON.stringify({ ok: true }))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-```
+Then update `.env` with the deployed `/exec` URL and restart `pnpm dev`.
